@@ -291,7 +291,7 @@ class XlsxDecoder extends SpreadsheetDecoder {
 
   void _parseSharedString(XmlElement node) {
     var list = [];
-    node.childElements.forEach((node) {
+    for (var node in node.childElements) {
       if (node.localName == 't') {
         list.add(_parseValue(node));
       } else if (node.localName == 'r') {
@@ -299,7 +299,7 @@ class XlsxDecoder extends SpreadsheetDecoder {
       } else {
         // ignores <rPh> and <phoneticPr>
       }
-    });
+    }
     _sharedStrings.add(list.join(''));
   }
 
@@ -446,7 +446,7 @@ class XlsxDecoder extends SpreadsheetDecoder {
 
     for (var child in node.children) {
       if (child is XmlText) {
-        buffer.write(_normalizeNewLine(child.text));
+        buffer.write(_normalizeNewLine(child.value));
       }
     }
 

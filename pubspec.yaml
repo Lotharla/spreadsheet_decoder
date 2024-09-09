@@ -7,8 +7,9 @@ environment:
   sdk: ">=2.16.2 <3.0.0"
 
 dependencies:
-  archive: ^3.3.6
+  archive:
   xml: ^6.2.2
+  frontend_server_client: ^4.0.0
 
 dev_dependencies:
   path: ^1.8.3

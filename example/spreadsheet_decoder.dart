@@ -3,17 +3,10 @@ import 'package:path/path.dart';
 import 'package:spreadsheet_decoder/spreadsheet_decoder.dart';
 
 void main(List<String> args) {
-  var file = 'test/files/test.xlsx';
+  var file = 'test/files/test.ods';
   var bytes = File(file).readAsBytesSync();
   var decoder = SpreadsheetDecoder.decodeBytes(bytes, update: true);
-  for (var table in decoder.tables.keys) {
-    print(table);
-    print(decoder.tables[table]!.maxCols);
-    print(decoder.tables[table]!.maxRows);
-    for (var row in decoder.tables[table]!.rows) {
-      print('$row');
-    }
-  }
+  printSheet(decoder);
 
   var sheet = decoder.tables.keys.first;
   decoder
@@ -34,6 +27,10 @@ void main(List<String> args) {
     ..writeAsBytesSync(decoder.encode());
 
   print('************************************************************');
+  printSheet(decoder);
+}
+
+void printSheet(SpreadsheetDecoder decoder) {
   for (var table in decoder.tables.keys) {
     print(table);
     print(decoder.tables[table]!.maxCols);

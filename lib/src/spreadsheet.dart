@@ -78,13 +78,32 @@ abstract class SpreadsheetDecoder {
   /// Dump XML content (for debug purpose)
   String dumpXmlContent([String? sheet]);
 
-  void _checkSheetArguments(String sheet) {
+  void _updateCheck() {
     if (_update != true) {
       throw ArgumentError("'update' should be set to 'true' on constructor");
     }
+  }
+
+  void _checkSheetArguments(String sheet) {
+    _updateCheck();
     if (_sheets.containsKey(sheet) == false) {
       throw ArgumentError("'$sheet' not found");
     }
+  }
+
+  /// Add sheet
+  void addSheet(String name) {
+    _updateCheck();
+    if (_sheets.containsKey(name)) {
+      throw ArgumentError("'$name' already exists");
+    }
+    _tables[name] = SpreadsheetTable(name);
+  }
+
+  /// Remove sheet
+  void removeSheet(String name) {
+    _checkSheetArguments(name);
+    _tables.remove(name);
   }
 
   /// Insert column in [sheet] at position [columnIndex]
@@ -160,9 +179,7 @@ abstract class SpreadsheetDecoder {
 
   /// Encode bytes after update
   List<int> encode() {
-    if (_update != true) {
-      throw ArgumentError("'update' should be set to 'true' on constructor");
-    }
+    _updateCheck();
 
     for (var xmlFile in _xmlFiles.keys) {
       var xml = _xmlFiles[xmlFile].toString();

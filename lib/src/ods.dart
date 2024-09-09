@@ -17,7 +17,7 @@ class OdsDecoder extends SpreadsheetDecoder {
   String get mediaType => 'application/vnd.oasis.opendocument.spreadsheet';
   @override
   String get extension => '.ods';
-  final Map<String, List<String>> _styleNames = {};
+  static final Map<String, List<String>> _styleNames = {};
 
   OdsDecoder(Archive archive, {bool update = false}) {
     _archive = archive;
@@ -33,6 +33,22 @@ class OdsDecoder extends SpreadsheetDecoder {
     } else {
       return _sheets[sheet]!.toXmlString(pretty: true);
     }
+  }
+
+  @override
+  void addSheet(String name) {
+    super.addSheet(name);
+    var parent = _sheets[_sheets.keys.first]!.parent;
+    var newTable = _createTable(name);
+    parent!.children.add(newTable);
+    _sheets[name] = newTable;
+  }
+  @override
+  void removeSheet(String name) {
+    super.removeSheet(name);
+    var parent = _sheets[name]!.parent;
+    parent!.children.remove(_sheets[name]);
+    _sheets.remove(name);
   }
 
   @override
@@ -222,7 +238,7 @@ class OdsDecoder extends SpreadsheetDecoder {
       if (child is XmlElement) {
         buffer.write(_normalizeNewLine(_readString(child)));
       } else if (child is XmlText) {
-        buffer.write(_normalizeNewLine(child.text));
+        buffer.write(_normalizeNewLine(child.value));
       }
     }
 
@@ -347,6 +363,22 @@ class OdsDecoder extends SpreadsheetDecoder {
       ..removeAt(index)
       ..insert(index, cell);
     return cell;
+  }
+
+  static XmlElement _createTable(String name) {
+    var attributes = <XmlAttribute>[
+      XmlAttribute(XmlName('table:name'), name),
+      XmlAttribute(XmlName('table:style-name'), _styleNames['table']!.first),
+    ];
+    var children = <XmlNode>[
+      XmlElement(XmlName('table:table-column'), [
+        XmlAttribute(
+            XmlName('table:style-name'), _styleNames['table-column']!.first),
+        XmlAttribute(
+            XmlName('table:default-cell-style-name'), 'Default'),
+      ]),
+    ];
+    return XmlElement(XmlName('table:table'), attributes, children);
   }
 
   static XmlElement _createRow(int maxCols, String style) {
